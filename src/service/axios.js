@@ -10,3 +10,7 @@ return universityApi.get("etudiants");
 export const  getMatieres=()=>{
     return universityApi.get("matieres");
     }
+    export const getImage=(filename)=>{
+        return universityApi.get(`images/${filename}`);
+        }
+    

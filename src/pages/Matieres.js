@@ -19,30 +19,38 @@ import {
   Upload,
   message,
   Avatar,
+  Tooltip,
+  Modal,
+  
 } from "antd";
 import {
- 
+  EditOutlined,
+  EllipsisOutlined, SettingOutlined ,
+  EyeOutlined,
   VerticalAlignTopOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 
 
-import profilavatar from "../assets/images/face-1.jpg";
-import convesionImg from "../assets/images/face-3.jpg";
-import convesionImg2 from "../assets/images/face-4.jpg";
-import convesionImg3 from "../assets/images/face-5.jpeg";
-import project1 from "../assets/images/home-decor-1.jpeg";
-import project2 from "../assets/images/home-decor-2.jpeg";
-import project3 from "../assets/images/home-decor-3.jpeg";
-import { getMatieres } from "../service/axios";
+import { getImage, getMatieres } from "../service/axios";
 
+
+const { Meta } = Card;
 function Matieres() {
+ 
   const [imageURL, setImageURL] = useState(false);
+ 
   const [, setLoading] = useState(false);
   const [matieres,setMatieres]=useState([])
-
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMatiere, setSelectedMatiere] = useState(null);
   useEffect(()=>{
     handleGetMatiere();
+   
 },[])
+
+
+
 const handleGetMatiere=()=>{
   getMatieres().then(
      (res)=>{
@@ -56,65 +64,73 @@ const handleGetMatiere=()=>{
      }
    )
 }
+const handleViewDetails = (matiere) => {
+  setSelectedMatiere(matiere);
+  setModalVisible(true);
+};
 
- 
-  const project = [
-    {
-      img: project1,
-      titlesub: "Project #1",
-      title: "Modern",
-      disciption:
-        "As Uber works through a huge amount of internal management turmoil.",
-    },
-    {
-      img: project2,
-      titlesub: "Project #2",
-      title: "Scandinavian",
-      disciption:
-        "Music is something that every person has his or her own specific opinion about.",
-    },
-    {
-      img: project3,
-      titlesub: "Project #3",
-      title: "Minimalist",
-      disciption:
-        "Different people have different taste, and various types of music, Zimbali Resort",
-    },
-  ];
+const handleCloseModal = () => {
+  setSelectedMatiere(null);
+  setModalVisible(false);
+};
+
+  
 
 
   return (
-    <>
-    
-     <Card
-        bordered={false}
-        className="header-solid mb-24"
-    
-      >
+    <>    
         <Row gutter={[24, 24]}>
-          {matieres.map((p, index) => (
-            <Col span={24} md={12} xl={6} key={index}>
-              <Card
-                bordered={false}
-                className="card-project"
-                cover={<img alt="example" src="" />}
-              >
-                <div className="card-tag">{p.id}</div>
-                <h5>{p.name}</h5>
-                <p>{p.desciption}</p>
-                <Row gutter={[6, 0]} className="card-footer">
-                  <Col span={12}>
-                    <Button type="button">VIEW NOTES</Button>
-                  </Col>
-                 
-                </Row>
-              </Card>
-            </Col>
-          ))}
-       
+        
+        {matieres.map((p, index) => (
+            <Col >
+              <Card gutter={[6, 0]}  key={index}
+          style={{
+            width: 300,
+          }}
+          cover={
+            <img
+              alt="example"
+              style={{ width: '100%', height: '200px' }}
+              src={`http://localhost:8000/api/images/${p.photo_url}`} 
+            />
+          }
+          actions={[
+            
+            <Tooltip title="View Notes">
+            <EyeOutlined key="eye" onClick={() => handleViewDetails(p)} />
+          </Tooltip>,
+          <Tooltip title="Edit matiere">
+            <EditOutlined key="edit" />
+          </Tooltip>,
+          <Tooltip title="Delete matiere">
+            <DeleteOutlined key="delete" />
+          </Tooltip>,
+            
+          ]}
+        >
+          <Meta
+            avatar={<Avatar src={`http://localhost:8000/api/images/${p.photo_url}`}  />}
+            title={p.name}
+            description={p.description}
+          />
+             </Card>
+          
+             </Col>   
+))}
         </Row>
-      </Card>
-  
+     
+        <Modal
+        title={selectedMatiere?.name}
+        visible={modalVisible}
+        onCancel={handleCloseModal}
+        footer={[
+          <Button key="close" onClick={handleCloseModal}>
+            Close
+          </Button>,
+        ]}
+      >
+    
+      </Modal>
     
     </>
   );

@@ -64,10 +64,10 @@ const formProps = {
 // table code start
 const columns = [
   {
-    title: "Avatar",
-    dataIndex: "avatar", // Assuming you have an "avatar" property in your student data
-    key: "avatar",
-    render: (avatar) => <Avatar src={face2} />,
+    title: "avatar",
+    dataIndex: "photo_url", 
+    key: "photo_url",
+    render: (photo_url) => <Avatar src={`http://localhost:8000/api/images/${photo_url}`} />,
     width: "10%",
   },
   {
@@ -88,12 +88,15 @@ const columns = [
     key: "lastname",
     width: "32%",
   },
-
- 
   {
     title: "Birthday",
     key: "birthday",
     dataIndex: "birthday",
+    width: "32%",
+  },
+  {
+    title: "actions",
+    key:"action", 
     width: "32%",
   },
 ];
