@@ -16,39 +16,38 @@ import {
   Col,
   Card,
   Button, 
-  Upload,
-  message,
+
   Avatar,
   Tooltip,
   Modal,
+  Descriptions,
+
   
 } from "antd";
 import {
-  EditOutlined,
-  EllipsisOutlined, SettingOutlined ,
+  EditOutlined, 
   EyeOutlined,
-  VerticalAlignTopOutlined,
   DeleteOutlined,
+  
 } from "@ant-design/icons";
 
 
-import { getImage, getMatieres } from "../service/axios";
+import {  getMatieres, getNotesByMatiere } from "../service/axios";
 
 
 const { Meta } = Card;
 function Matieres() {
  
-  const [imageURL, setImageURL] = useState(false);
- 
-  const [, setLoading] = useState(false);
+
   const [matieres,setMatieres]=useState([])
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMatiere, setSelectedMatiere] = useState(null);
+  const [notes, setNotes] = useState([]); // State to hold the list of notes
+
   useEffect(()=>{
     handleGetMatiere();
    
-},[])
-
+}, [])
 
 
 const handleGetMatiere=()=>{
@@ -64,9 +63,16 @@ const handleGetMatiere=()=>{
      }
    )
 }
-const handleViewDetails = (matiere) => {
+const handleViewDetails = async (matiere) => {
   setSelectedMatiere(matiere);
   setModalVisible(true);
+  try {
+    const notesResponse = await getNotesByMatiere(matiere.id); // Replace with your API call to get notes
+    setNotes(notesResponse.data.notes);
+    console.log(notesResponse.data)
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const handleCloseModal = () => {
@@ -129,7 +135,49 @@ const handleCloseModal = () => {
           </Button>,
         ]}
       >
-    
+        <Row gutter={[24, 24]}>
+        <div
+              style={{
+                maxHeight: "300px",
+                overflowY: "auto",
+                paddingRight: "20px", // To prevent content from shifting when scroll bar appears
+              }}
+            >
+              {notes.map((note, index) => (
+                <Col  span={24} key={index}>
+                  <Card className="card-billing-info" bordered="false">
+                    <div className="col-info">
+                    <Avatar src={`http://localhost:8000/api/images/${note.etudiant.photo_url}`}  />
+                    <Descriptions title={`Note Score: ${note.score}`} titleStyle={{ color: note.score < 10 ? 'red' : 'green' }}>
+                        <Descriptions.Item label="Full Name" span={3}>
+                        {note.etudiant.firstname} {note.etudiant.lastname}
+                        
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Email Address" span={3}>
+                        {note.etudiant.firstname}.{note.etudiant.lastname}@isetZG.com
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Identifiant" span={3}>
+                          {note.etudiant.cin}
+                        </Descriptions.Item>
+                      </Descriptions>
+                    </div>
+                    <div className="col-action">
+                      <Button type="link" danger>
+                        DELETE
+                      </Button>
+                      <Button type="link" className="darkbtn">
+                         EDIT
+                      </Button>
+                      
+                    </div>
+                    
+                  </Card>
+                 
+                </Col>
+              ))}
+              </div>
+            </Row>
       </Modal>
     
     </>

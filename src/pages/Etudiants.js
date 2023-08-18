@@ -13,55 +13,92 @@ import {
   Row,
   Col,
   Card,
-  Radio,
   Table,
-  Upload,
-  message,
-  Progress,
   Button,
+  Modal,
+  Space,
   Avatar,
-  Typography,
+  Form, Input,Upload
 } from "antd";
+import {
+  EditOutlined, 
+  EyeOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  UploadOutlined,
+  
+} from "@ant-design/icons";
 
-import { ToTopOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
 
-// Images
-import ava1 from "../assets/images/logo-shopify.svg";
-import ava2 from "../assets/images/logo-atlassian.svg";
-import ava3 from "../assets/images/logo-slack.svg";
-import ava5 from "../assets/images/logo-jira.svg";
-import ava6 from "../assets/images/logo-invision.svg";
-import face from "../assets/images/face-1.jpg";
-import face2 from "../assets/images/face-2.jpg";
-import face3 from "../assets/images/face-3.jpg";
-import face4 from "../assets/images/face-4.jpg";
-import face5 from "../assets/images/face-5.jpeg";
-import face6 from "../assets/images/face-6.jpeg";
-import pencil from "../assets/images/pencil.svg";
 import { useEffect, useState } from "react";
 import { getEtudiants } from "../service/axios";
 
-const { Title } = Typography;
 
-const formProps = {
-  name: "file",
-  action: "https://www.mocky.io/v2/5cc8019d300000980a055e76",
-  headers: {
-    authorization: "authorization-text",
-  },
-  onChange(info) {
-    if (info.file.status !== "uploading") {
-      console.log(info.file, info.fileList);
-    }
-    if (info.file.status === "done") {
-      message.success(`${info.file.name} file uploaded successfully`);
-    } else if (info.file.status === "error") {
-      message.error(`${info.file.name} file upload failed.`);
-    }
-  },
+const layout = {
+  labelCol: { span: 6 },
+  wrapperCol: { span: 18 },
 };
-// table code start
+
+const handleShowDetails = (record) => {
+  
+  Modal.info({
+    title: "Student Details",
+    content: (
+      <div>
+        <p>Student ID: {record.id}</p>
+        <p>First Name: {record.firstname}</p>
+        <p>Last Name: {record.lastname}</p>
+        {/* Display other details as needed */}
+      </div>
+    ),
+  });
+};
+
+function Etudiants() {
+
+
+  const [etudiants,setEtudiants]=useState([])
+ 
+  const [totalPages,setTotalPages]=useState(1);
+  const [loading,setLoading]=useState(false);
+  const [per_page,setPer_page]=useState(1);
+  const [currentPage,setCurrentPage]=useState(1);
+  const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [recordToUpdate, setRecordToUpdate] = useState(null);
+  
+    useEffect(()=>{
+         handleGetEtudiant(currentPage);
+    },[])
+  const handleGetEtudiant=(page)=>{
+   console.log(page)
+     getEtudiants(page).then(
+        (res)=>{
+          console.log(res.data);    
+          setLoading(true)
+          setEtudiants(res.data.data);
+          setTotalPages(res.data.last_page)
+          setPer_page(res.data.per_page)
+          setCurrentPage(res.data.current_page)
+          setLoading(false)
+          console.log("loading in state",etudiants);
+        }
+      ).catch(
+        (error)=>{
+          console.log(error);
+        }
+      )
+}
+const handleUpdate = (record) => {
+  setRecordToUpdate(record);
+  console.log(record)
+  setUpdateModalVisible(true)
+
+};
+const handleUpdateSubmit = (values) => {
+  // Submit update form logic here
+  console.log("Form values:", values);
+  setUpdateModalVisible(false);
+};
 const columns = [
   {
     title: "avatar",
@@ -96,39 +133,40 @@ const columns = [
   },
   {
     title: "actions",
-    key:"action", 
-    width: "32%",
+    key: "action",
+    width: "10%",
+    render: (_, record) => (
+      <Space size="middle">
+        <Button
+          type="primary"
+          icon={<EyeOutlined />}
+          onClick={() => handleShowDetails(record)}
+        >
+          Details
+        </Button>
+        <Button
+          type="default"
+          icon={<EditOutlined />}
+          onClick={() => handleUpdate(record)}
+        >
+          Update
+        </Button>
+        <Button
+          type="danger"
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(record.id)}
+        >
+          Delete
+        </Button>
+      </Space>
+    ),
   },
 ];
+const handleDelete = (id) => {
+  // Implement the logic to delete the student with the given id
+  // You might want to show a confirmation dialog before proceeding
+};
 
-
-
-function Etudiants() {
-
-  const onChange = (e) => console.log(`radio checked:${e.target.value}`);
-  const [etudiants,setEtudiants]=useState([])
-  const [state,setState]=useState({
-    currentPage:1,
-    pageSize:10,
-    keyword:"",
-    totalPage:""
-  })
-    useEffect(()=>{
-         handleGetEtudiant();
-    },[])
-  const handleGetEtudiant=()=>{
-     getEtudiants().then(
-        (res)=>{
-          console.log(res.data);    
-         setEtudiants(res.data)
-          console.log("loading in state",etudiants);
-        }
-      ).catch(
-        (error)=>{
-          console.log(error);
-        }
-      )
-}
 
   return (
     <>
@@ -139,13 +177,33 @@ function Etudiants() {
               bordered={false}
               className="criclebox tablespace mb-24"
               title="All Etudiant"
-            
+              extra={(
+                <Button
+                  type="primary"
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    // Implement the logic to show the add student modal or navigate to add student page
+                    // For example, you can set a state to control the modal visibility
+                  }}
+                >
+                  Add Student
+                </Button>
+              )}
             >
               <div className="table-responsive">
                 <Table
                   columns={columns}
                   dataSource={etudiants} 
-                  pagination={false}
+                  pagination={{
+                    pageSize:per_page,
+                    total:totalPages,
+                    current:currentPage,
+                    onChange:(page)=>{
+                      handleGetEtudiant(page)
+                    }
+                  }}
+                
+                  loading={loading}
                   className="ant-border-space"
                 />
               </div>
@@ -153,6 +211,65 @@ function Etudiants() {
           </Col>
         </Row>
       </div>
+      {updateModalVisible && (
+      <Modal
+        title="Update Student"
+        visible={updateModalVisible}
+        onCancel={() => setUpdateModalVisible(false)}
+        footer={null}
+      >
+                <Form
+            {...layout}
+            onFinish={handleUpdateSubmit}
+            initialValues={recordToUpdate}
+          >
+            <Form.Item
+              label="First Name"
+              name="firstname"
+              rules={[{ required: true, message: "Please enter first name" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Last Name"
+              name="lastname"
+              rules={[{ required: true, message: "Please enter last name" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="CIN"
+              name="cin"
+              rules={[{ required: true, message: "Please enter CIN" }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Birthday"
+              name="birthday"
+              rules={[{ required: true, message: "Please enter birthday" }]}
+            >  
+
+              <Input />
+
+            </Form.Item>
+            <Form.Item label="Profile Photo">
+      <Upload
+        name="avatar"
+        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        listType="picture"
+      >
+        <Button icon={<UploadOutlined />}>Upload Photo</Button>
+      </Upload>
+    </Form.Item>
+            <Form.Item wrapperCol={{ ...layout.wrapperCol, offset: 6 }}>
+              <Button type="primary" htmlType="submit">
+                Update
+              </Button>
+            </Form.Item>
+          </Form>
+      </Modal>
+      )}
     </>
   );
 }

@@ -11,7 +11,7 @@
 */
 
 // import { useState } from "react";
-import { Menu, Button } from "antd";
+import { Menu } from "antd";
 import { NavLink, useLocation } from "react-router-dom";
 import logo from "../../assets/images/logo.png";
 
@@ -86,23 +86,7 @@ function Sidenav({ color }) {
     </svg>,
   ];
 
-  const rtl = [
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      key={0}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M3 6C3 4.34315 4.34315 3 6 3H16C16.3788 3 16.725 3.214 16.8944 3.55279C17.0638 3.89157 17.0273 4.29698 16.8 4.6L14.25 8L16.8 11.4C17.0273 11.703 17.0638 12.1084 16.8944 12.4472C16.725 12.786 16.3788 13 16 13H6C5.44772 13 5 13.4477 5 14V17C5 17.5523 4.55228 18 4 18C3.44772 18 3 17.5523 3 17V6Z"
-        fill={color}
-      ></path>
-    </svg>,
-  ];
+  
 
   const profile = [
     <svg
@@ -122,43 +106,6 @@ function Sidenav({ color }) {
     </svg>,
   ];
 
-  const signin = [
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      key={0}
-    >
-      <path
-        fillRule="evenodd"
-        clipRule="evenodd"
-        d="M6 2C5.44772 2 5 2.44772 5 3V4H4C2.89543 4 2 4.89543 2 6V16C2 17.1046 2.89543 18 4 18H16C17.1046 18 18 17.1046 18 16V6C18 4.89543 17.1046 4 16 4H15V3C15 2.44772 14.5523 2 14 2C13.4477 2 13 2.44772 13 3V4H7V3C7 2.44772 6.55228 2 6 2ZM6 7C5.44772 7 5 7.44772 5 8C5 8.55228 5.44772 9 6 9H14C14.5523 9 15 8.55228 15 8C15 7.44772 14.5523 7 14 7H6Z"
-        fill={color}
-      ></path>
-    </svg>,
-  ];
-
-  const signup = [
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      key={0}
-    >
-      <path
-        d="M0,2A2,2,0,0,1,2,0H8a2,2,0,0,1,2,2V8a2,2,0,0,1-2,2H2A2,2,0,0,1,0,8Z"
-        transform="translate(4 4)"
-        fill={color}
-      />
-      <path
-        d="M2,0A2,2,0,0,0,0,2V8a2,2,0,0,0,2,2V4A2,2,0,0,1,4,2h6A2,2,0,0,0,8,0Z"
-        fill={color}
-      />
-    </svg>,
-  ];
 
   return (
     <>
@@ -207,11 +154,35 @@ function Sidenav({ color }) {
             <span className="label">Matieres</span>
           </NavLink>
         </Menu.Item>
-      
-        <Menu.Item className="menu-item-header" key="4">
-          Account Pages
+        <Menu.Item key="4">
+          <NavLink to="/specialities">
+            <span
+              className="icon"
+              
+            >
+              {billing}
+            </span>
+            <span className="label">specialities</span>
+            
+          </NavLink>
         </Menu.Item>
         <Menu.Item key="5">
+          <NavLink to="/departments">
+            <span
+              className="icon"
+              
+            >
+              {billing}
+            </span>
+            <span className="label">Departments</span>
+            
+          </NavLink>
+        </Menu.Item>
+      
+        <Menu.Item className="menu-item-header" key="5">
+          Account Pages
+        </Menu.Item>
+        <Menu.Item key="6">
           <NavLink to="/profile">
             <span
               className="icon"

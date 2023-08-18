@@ -21,6 +21,8 @@ import "./assets/styles/main.css";
 import "./assets/styles/responsive.css";
 import Etudiants from "./pages/Etudiants";
 import Matieres from "./pages/Matieres";
+import Speciality from "./pages/Speciality";
+import Departments from "./pages/Department";
 
 function App() {
   return (
@@ -32,6 +34,9 @@ function App() {
         <Main>
           <Route exact path="/dashboard" component={Home} />
           <Route exact path="/etudiants" component={Etudiants} />
+          <Route exact path="/specialities" component={Speciality} />
+          <Route exact path="/departments" component={Departments} />
+        
           <Route exact path="/matieres" component={Matieres} />
           <Route exact path="/rtl" component={Rtl} />
           <Route exact path="/profile" component={Profile} />

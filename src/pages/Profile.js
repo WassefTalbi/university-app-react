@@ -9,7 +9,7 @@
   =========================================================
   * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 */
-import { useState } from "react";
+
 
 import {
   Row,
@@ -21,15 +21,13 @@ import {
   Avatar,
   Radio,
   Switch,
-
-  message,
 } from "antd";
 
 import {
   FacebookOutlined,
   TwitterOutlined,
   InstagramOutlined,
-  VerticalAlignTopOutlined,
+  
 } from "@ant-design/icons";
 
 import BgProfile from "../assets/images/bg-profile.jpg";
@@ -42,8 +40,8 @@ import convesionImg5 from "../assets/images/face-2.jpg";
 
 
 function Profile() {
-  const [imageURL, setImageURL] = useState(false);
-  const [, setLoading] = useState(false);
+
+  
 
 
   
