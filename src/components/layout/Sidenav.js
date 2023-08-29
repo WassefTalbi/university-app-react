@@ -111,7 +111,7 @@ function Sidenav({ color }) {
     <>
       <div className="brand">
         <img src={logo} alt="" />
-        <span>Muse Dashboard</span>
+        
       </div>
       <hr />
       <Menu theme="light" mode="inline">
@@ -125,7 +125,7 @@ function Sidenav({ color }) {
             >
               {dashboard}
             </span>
-            <span className="label">Dashboard</span>
+            <span className="label">tableau de bord</span>
           </NavLink>
         </Menu.Item>
         <Menu.Item key="2">
@@ -155,18 +155,6 @@ function Sidenav({ color }) {
           </NavLink>
         </Menu.Item>
         <Menu.Item key="4">
-          <NavLink to="/specialities">
-            <span
-              className="icon"
-              
-            >
-              {billing}
-            </span>
-            <span className="label">specialities</span>
-            
-          </NavLink>
-        </Menu.Item>
-        <Menu.Item key="5">
           <NavLink to="/departments">
             <span
               className="icon"
@@ -174,15 +162,28 @@ function Sidenav({ color }) {
             >
               {billing}
             </span>
-            <span className="label">Departments</span>
+            <span className="label">Départements</span>
             
           </NavLink>
         </Menu.Item>
       
-        <Menu.Item className="menu-item-header" key="5">
+        <Menu.Item key="5">
+          <NavLink to="/specialities">
+            <span
+              className="icon"
+              
+            >
+              {billing}
+            </span>
+            <span className="label">Spécialités</span>
+            
+          </NavLink>
+        </Menu.Item>
+      
+        <Menu.Item className="menu-item-header" key="6">
           Account Pages
         </Menu.Item>
-        <Menu.Item key="6">
+        <Menu.Item key="7">
           <NavLink to="/profile">
             <span
               className="icon"

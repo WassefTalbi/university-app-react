@@ -342,6 +342,7 @@ function Home() {
 
   return (
     <>
+      {/*
       <div className="layout-content">
         <Row className="rowgap-vbox" gutter={[24, 0]}>
           {count.map((c, index) => (
@@ -554,6 +555,7 @@ function Home() {
           </Col>
         </Row>
       </div>
+      */}
     </>
   );
 }
