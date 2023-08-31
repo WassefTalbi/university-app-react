@@ -137,7 +137,7 @@ const onFileChange = ({ fileList }) => {
   setFileList(fileList);
 };
 const onFinish = async (values) => {
-  console.log("to add",fileList[0].originFileObj)
+
   const formData = new FormData();
   formData.append('file', fileList[0].originFileObj);
   formData.append("name", values.name);
@@ -430,7 +430,7 @@ const onModuleSelectChange = (moduleId) => {
                 </Select.Option>
               ))}
             </Select>
-          </Form.Item>
+      </Form.Item>
       <Form.Item label="Photo de matiere"  rules={[ { required: true, message: "Veuillez télécharger une photo de profil" },
 ]}>
       <Upload

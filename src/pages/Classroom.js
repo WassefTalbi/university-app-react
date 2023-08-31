@@ -16,14 +16,12 @@ import {
   
 } from "antd";
 import {
-  EditOutlined, 
+  SettingOutlined ,
   EyeOutlined,
-  DeleteOutlined,
-  
 } from "@ant-design/icons";
 
 
-import {  getMatieres, getMatieresOfClassroom, getNotesByMatiere } from "../service/axios";
+import {  getEtudiantsByClass, getEvalutionsOfMatiere, getMatieres, getMatieresOfClassroom, getNotesByMatiere } from "../service/axios";
 
 
 
@@ -34,6 +32,9 @@ function Classroom() {
 
 
   const [matieres,setMatieres]=useState([])
+  const [evaluations,setEvaluations]=useState([])
+  const [etudiants,setEtudiants]=useState([])
+  const [notedModalVisible, setNotedModalVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMatiere, setSelectedMatiere] = useState(null);
   const [currentClass, setCurrentClass] = useState([]); // State to hold the list of notes
@@ -42,12 +43,24 @@ function Classroom() {
   const location = useLocation();
   const departmentName = new URLSearchParams(location.search).get('department');
   useEffect(()=>{
-    handleGetMatiere();
-   
+    handleGetMatieres();
+    handleGetEtudiants();
 }, [])
 
-
-const handleGetMatiere=()=>{
+const handleGetEtudiants=()=>{
+  getEtudiantsByClass(id).then(
+   (res)=>{
+     console.log("etudiants",res.data);
+     setEtudiants(res.data)
+ 
+   }
+ ).catch(
+   (error)=>{
+     console.log(error);
+   }
+ )
+}
+const handleGetMatieres=()=>{
     getMatieresOfClassroom(id).then(
      (res)=>{
        console.log("test fr id",res.data);
@@ -72,10 +85,26 @@ const handleViewDetails = async (matiere) => {
     console.log(error);
   }
 };
+const handleNoted = async (matiere) => {
+  setSelectedMatiere(matiere);
+  setNotedModalVisible(true);
+  try {
+    const matiere_evaluations = await getEvalutionsOfMatiere(matiere.id); 
+    setEvaluations(matiere_evaluations.data.evaluations);
+    console.log(matiere_evaluations.data.evaluations)
+    console.log(etudiants)
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const handleCloseModal = () => {
   setSelectedMatiere(null);
   setModalVisible(false);
+};
+const handleCloseNotedModal = () => {
+  setSelectedMatiere(null);
+  setNotedModalVisible(false);
 };
 
   
@@ -105,17 +134,17 @@ const handleCloseModal = () => {
               src={`http://localhost:8000/api/images/${p.photo_url}`} 
             />
           }
+          bodyStyle={{
+            width: 300,
+          }}
           actions={[
             
             <Tooltip title="View Notes">
             <EyeOutlined key="eye" onClick={() => handleViewDetails(p)} />
-          </Tooltip>,
-          <Tooltip title="Edit matiere">
-            <EditOutlined key="edit" />
-          </Tooltip>,
-          <Tooltip title="Delete matiere">
-            <DeleteOutlined key="delete" />
-          </Tooltip>,
+            </Tooltip>,
+            <Tooltip title="Noted">
+            <SettingOutlined key="noted" onClick={() => handleNoted(p)}  />
+            </Tooltip>,
             
           ]}
         >
@@ -145,7 +174,7 @@ const handleCloseModal = () => {
               style={{
                 maxHeight: "300px",
                 overflowY: "auto",
-                paddingRight: "20px", // To prevent content from shifting when scroll bar appears
+                paddingRight: "20px", 
               }}
             >
               {notes.map((note, index) => (
@@ -184,7 +213,21 @@ const handleCloseModal = () => {
               </div>
             </Row>
       </Modal>
+      <Modal
+        title={selectedMatiere?.name}
+        visible={notedModalVisible}
+        onCancel={handleCloseNotedModal}
+        footer={[
+          <Button key="close" onClick={handleCloseNotedModal}>
+            Close
+          </Button>,
+        ]}
+      >
+       
+            <Row gutter={[24, 24]}>
     
+            </Row>
+      </Modal>
     </>
   );
 }

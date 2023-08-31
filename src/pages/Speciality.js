@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { List, Card, Dropdown, Menu, Modal,Row, Table,Breadcrumb } from "antd";
-import { DownloadOutlined,DownOutlined } from "@ant-design/icons";
+import { List, Card, Dropdown, Menu, Modal,Row, Table,Breadcrumb,Tooltip } from "antd";
+import { DownloadOutlined,DownOutlined,EditOutlined, 
+  PlusOutlined,
+  DeleteOutlined,
+  SettingOutlined,
+  UploadOutlined,
+  EyeOutlined, } from "@ant-design/icons";
 import { getPlanOfSpeciality, getSpecialites } from "../service/axios";
 import jsPDF from "jspdf";
 import "jspdf-autotable"; // Import the autoTable plugin
@@ -180,6 +185,21 @@ function Speciality() {
           doc.setTextColor(255, 0, 0); // Set text color to red for the "Total" row
         }
       },
+      drawCell: function (cell, data) {
+        // Rowspan
+        if (data.column.dataIndex === 0) {
+            if (data.row.index % tableData.matieres.length === 0) {
+                doc.rect(cell.x, cell.y, data.table.width, cell.height * tableData.matieres.length, 'S');
+                doc.autoTableText(data.row.index, {
+                    halign: 'center',
+                    valign: 'middle'
+                });
+            }
+            return false;
+        }
+    }
+    
+    
     });
   
     // Calculate Y position for the additional text
@@ -215,7 +235,21 @@ function Speciality() {
         dataSource={specialities}
         renderItem={(Specialite) => (
           <List.Item>
-            <Card title={Specialite.type}>
+            <Card title={Specialite.type}
+               actions={[
+            
+                <Tooltip title="spécialité && modules">
+                <SettingOutlined key="detail"   />
+                 </Tooltip>,
+                <Tooltip title="modifier spécialité">
+                  <EditOutlined key="edit"  />
+                </Tooltip>,
+                <Tooltip title="supprimer spécialité">
+                  <DeleteOutlined key="delete"   />
+                </Tooltip>,
+                
+                ]}
+            >
               {Specialite.name}
               <div style={{ position: "relative", marginTop: "10px" }}>
                 <Dropdown
@@ -269,7 +303,7 @@ function Speciality() {
             pagination={false}
             scroll={{ x: "max-content" }}
           />
-    
+     
       </Modal>
 
     </>

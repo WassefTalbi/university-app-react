@@ -3,6 +3,8 @@ import axios from "axios";
 export const universityApi= axios.create(
     {baseURL:"http://localhost:8000/api/"}
 )
+
+
 //etudiant
 export const  getEtudiants=(page)=>{
  return universityApi.get(`etudiants?page=${page}`);
@@ -24,9 +26,10 @@ export const  updateEtudiant=(id,values)=>{
 export const  deleteEtudiant=(id)=>{
   return universityApi.delete(`etudiants/${id}`);
   }
-export const  getMatieres=()=>{
-  return universityApi.get("matieres");
-  }
+export const  getEtudiantsByClass=(id)=>{
+  return universityApi.get(`etudiants/etudiants-of-classroom/${id}`);
+   }
+  
 
   //matiere
 export const  createMatiere=(idModule,values)=>{
@@ -52,27 +55,45 @@ export const  getMatieresOfClassroom=(id)=>{
 export const  getPlanOfSpeciality=(idDegre)=>{
   return universityApi.get(`specialites/generatePlanDEtude-of-specialite/${idDegre}`);
     }
-
-    //departments && classrooms
-
+ export const  getMatieres=()=>{
+      return universityApi.get("matieres");
+      }
+export const  getEvalutionsOfMatiere=(id)=>{
+   return universityApi.get(`matieres/evaluations-of-matiere/${id}`);
+     }
+     
+//classes
 export const  createClass=(idDepartment,values)=>{
  return universityApi.post(`classrooms/${idDepartment}`,values);
     }
-export const  createDepartment=(values)=>{
-  return universityApi.post(`departments/`,values);
+export const  deleteClass=(id)=>{
+  return universityApi.delete(`classrooms/${id}`);
    }
-   export const  deleteDepartment=(id)=>{
-    return universityApi.delete(`departments/${id}`);
-    }
-    export const  deleteClass=(id)=>{
-      return universityApi.delete(`classrooms/${id}`);
-      }
+
+
+
+//modules
 export const  getModules=()=>{
    return universityApi.get("modules");
    }
+
+
+
+   //specialities
 export const  getSpecialites=()=>{
     return universityApi.get("specialites");
     }
+export const  getSpecialitesByNiveau=()=>{
+  return universityApi.get("specialites/showSpecialitiesGroupByNiveau");
+    }
+
+    //departments 
+export const  createDepartment=(values)=>{
+  return universityApi.post(`departments/`,values);
+  }
+  export const  deleteDepartment=(id)=>{
+   return universityApi.delete(`departments/${id}`);
+   }
 export const  getDepartments=()=>{
      return universityApi.get("departments");
     }
@@ -80,9 +101,12 @@ export const  getClassroomsOfDepartment=(idDepartment)=>{
       return universityApi.get(`departments/classrooms-of-department/${idDepartment}`);
      }
     
+//get image
 export const getImage=(filename)=>{
   return universityApi.get(`images/${filename}`);
     }
+
+    //display notes
 export const  getNotesByMatiere=(idMatiere)=>{
     return universityApi.get(`matieres/notes-of-matiere-of-classroom/${idMatiere}`);
   }

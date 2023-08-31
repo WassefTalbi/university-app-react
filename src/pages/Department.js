@@ -1,7 +1,7 @@
   import React, { useEffect, useState } from "react";
-  import { Row, Col, Card, Button , Form, DatePicker,Input,Modal,Breadcrumb} from "antd";
+  import { Row, Col, Card, Button , Form, DatePicker,Input,Modal,Select,Breadcrumb} from "antd";
   import { EditOutlined, DeleteOutlined,EyeOutlined,PlusOutlined,HomeOutlined, UserOutlined } from "@ant-design/icons";
-  import { createClass, createDepartment, deleteClass, deleteDepartment, getDepartments } from "../service/axios";
+  import { createClass, createDepartment, deleteClass, deleteDepartment, getDepartments, getSpecialites, getSpecialitesByNiveau } from "../service/axios";
   import { Link } from 'react-router-dom';
   import { ToastContainer, toast } from 'react-toastify';
   import moment from 'moment'; 
@@ -14,6 +14,7 @@
     labelCol: { span: 6 },
     wrapperCol: { span: 18 },
   };
+  
   function Departments() {
 
 
@@ -21,10 +22,36 @@
     const [currentDepartment, setCurrentDepartment] = useState([]);
     const [addModalVisible, setAddModalVisible] = useState(false);
     const [addDepartmentModalVisible, setAddDepartmentModalVisible] = useState(false);
+    const [specialities, setSpecialities] = useState([]);
+    const [selectedSpecialityId, setSelectedSpecialityId] = useState(null); 
+    const [selectedDegreNiveau, setSelectedDegreNiveau] = useState(null); 
     useEffect(() => {
       handleGetDepartments();
+      handleGetSpecialites();
+
     }, []);
+
+
     const [form] = Form.useForm();
+
+    const onModuleSelectChange = (combinedValue) => {
+      const { specialityId, niveau } = JSON.parse(combinedValue);
+      setSelectedSpecialityId(specialityId);
+      console.log(specialityId);
+      console.log(niveau);
+      setSelectedDegreNiveau(niveau);
+    };
+    
+    const handleGetSpecialites = () => {
+      getSpecialitesByNiveau()
+        .then((res) => {
+          setSpecialities(res.data);
+          console.log("loading speciality", res.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    };
     const handleGetDepartments = () => {
       getDepartments()
         .then((res) => {
@@ -34,7 +61,6 @@
           console.log(error);
         });
     };
-
       // Function to customize the date display and parsing
       const academicYearDisplay = (moment) => {
         if (moment) {
@@ -56,13 +82,18 @@
       setAddDepartmentModalVisible(false);
       form.resetFields(); 
     };
+
+   
+
     const onFinish = async (values) => {
 
     const formData = new FormData();
     formData.append("ref", values.ref);
     const academicYear = values.anneScolaire.format('YYYY') + '-' + (values.anneScolaire.year() + 1);
     formData.append("anneScolaire", academicYear);
-
+    formData.append("specialityId", selectedSpecialityId);
+    formData.append("degreNiveau", selectedDegreNiveau);
+    
     try {
     
     await createClass(currentDepartment.id,formData);
@@ -164,7 +195,7 @@
               {department.classrooms.map((classroom) => (
                 <Col span={8} key={classroom.id}>
                   <Card hoverable style={departmentCardStyle}>
-                    <h3> class : { classroom.ref}</h3>
+                    <h3> classe : { classroom.ref}</h3>
                     <p>{classroom.anneScolaire}</p>
                     <Link to=  {{
                         pathname: `/class-details/${classroom.id}`,
@@ -215,7 +246,21 @@
               placeholder="Sélectionnez une année scolaire"
             />
           </Form.Item>
-      
+          <Form.Item
+            label="Sélectionner une spécialite"
+            name="speciality_id"
+            rules={[{ required: true, message: "Veuillez sélectionner une spécialite" }]}
+          >
+            <Select onChange={onModuleSelectChange}>
+              {specialities.map((specialite) => (
+                <Select.Option key={`${specialite.id}-${specialite.niveau}`} 
+                value={JSON.stringify({ specialityId: specialite.id, niveau: specialite.niveau })}>
+                  {specialite.type} {specialite.niveau + " année"}
+                </Select.Option>
+              ))}
+            </Select>
+
+      </Form.Item>
         
       
     
