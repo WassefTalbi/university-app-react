@@ -1,232 +1,276 @@
-
-import { useEffect, useState } from "react";
-import { useLocation, useParams } from 'react-router-dom';
-
+import React, { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import {
   Row,
   Col,
   Card,
-  Button, 
   Breadcrumb,
   Avatar,
   Tooltip,
   Modal,
-  Descriptions,
-
-  
+  Table,
+  InputNumber,
 } from "antd";
 import {
-  SettingOutlined ,
+  SettingOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
 
-
-import {  getEtudiantsByClass, getEvalutionsOfMatiere, getMatieres, getMatieresOfClassroom, getNotesByMatiere } from "../service/axios";
-
-
+import {
+  getEtudiantsByClass,
+  getEtuiantWithGrades,
+  getEvalutionsOfMatiere,
+  getMatieres,
+  getMatieresOfClassroom,
+  getNotesByMatiere,
+  updateGradeInBackend, // Import your API function to update grades
+} from "../service/axios";
 
 const { Meta } = Card;
+
 function Classroom() {
- 
-    const { id } = useParams();
+  const { id } = useParams();
 
-
-  const [matieres,setMatieres]=useState([])
-  const [evaluations,setEvaluations]=useState([])
-  const [etudiants,setEtudiants]=useState([])
+  const [matieres, setMatieres] = useState([]);
+  const [evaluations, setEvaluations] = useState([]);
+  const [etudiants, setEtudiants] = useState([]);
+  const [etudiantWithGrades, setEtudiantWithGrades] = useState([]);
   const [notedModalVisible, setNotedModalVisible] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
   const [selectedMatiere, setSelectedMatiere] = useState(null);
-  const [currentClass, setCurrentClass] = useState([]); // State to hold the list of notes
-  const [notes, setNotes] = useState([]); // State to hold the list of notes
+  const [currentClass, setCurrentClass] = useState([]);
   const { classroomId } = useParams();
   const location = useLocation();
-  const departmentName = new URLSearchParams(location.search).get('department');
-  useEffect(()=>{
+  const departmentName = new URLSearchParams(location.search).get("department");
+
+  const [editingKey, setEditingKey] = useState(null);
+
+  const isEditing = (record, evaluationName) => {
+    return record.id === editingKey && record.editingField === evaluationName;
+  };
+
+  const edit = (record, evaluationName) => {
+    setEditingKey(record.id);
+    record.editingField = evaluationName;
+  };
+
+  const save = async (record, evaluationName, value) => {
+    const studentId = record.id; // Assuming `id` is the student's ID
+    const matiereName = evaluationName; // Assuming `evaluationName` is the matiere name
+  
+    const requestData = {
+      evaluation_name:evaluationName,
+      matiere_id: selectedMatiere.id,
+      value: value,
+    };
+  
+    try {
+      await updateGradeInBackend(studentId, requestData);
+      const updatedEtudiantWithGrades = etudiantWithGrades.map((etudiant) => {
+        if (etudiant.id === record.id) {
+          etudiant.grades[evaluationName] = value;
+          etudiant.editing = false;
+          etudiant.editingField = null;
+        }
+        return etudiant;
+      });
+      setEtudiantWithGrades(updatedEtudiantWithGrades);
+      setEditingKey(null);
+    } catch (error) {
+      console.error("Error saving grade:", error);
+    }
+  };
+
+  useEffect(() => {
     handleGetMatieres();
     handleGetEtudiants();
-}, [])
+  }, []);
 
-const handleGetEtudiants=()=>{
-  getEtudiantsByClass(id).then(
-   (res)=>{
-     console.log("etudiants",res.data);
-     setEtudiants(res.data)
- 
-   }
- ).catch(
-   (error)=>{
-     console.log(error);
-   }
- )
-}
-const handleGetMatieres=()=>{
-    getMatieresOfClassroom(id).then(
-     (res)=>{
-       console.log("test fr id",res.data);
-       setCurrentClass(res.data)
-       setMatieres(res.data.matieres)
-   
-     }
-   ).catch(
-     (error)=>{
-       console.log(error);
-     }
-   )
-}
-const handleViewDetails = async (matiere) => {
-  setSelectedMatiere(matiere);
-  setModalVisible(true);
-  try {
-    const notesResponse = await getNotesByMatiere(matiere.id); // Replace with your API call to get notes
-    setNotes(notesResponse.data.notes);
-    console.log(notesResponse.data)
-  } catch (error) {
-    console.log(error);
-  }
-};
-const handleNoted = async (matiere) => {
-  setSelectedMatiere(matiere);
-  setNotedModalVisible(true);
-  try {
-    const matiere_evaluations = await getEvalutionsOfMatiere(matiere.id); 
-    setEvaluations(matiere_evaluations.data.evaluations);
-    console.log(matiere_evaluations.data.evaluations)
-    console.log(etudiants)
-  } catch (error) {
-    console.log(error);
-  }
-};
+  const handleGetEtudiants = () => {
+    getEtudiantsByClass(id)
+      .then((res) => {
+        console.log("etudiants", res.data);
+        setEtudiants(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
-const handleCloseModal = () => {
-  setSelectedMatiere(null);
-  setModalVisible(false);
-};
-const handleCloseNotedModal = () => {
-  setSelectedMatiere(null);
-  setNotedModalVisible(false);
-};
+  const handleGetMatieres = () => {
+    getMatieresOfClassroom(id)
+      .then((res) => {
+        console.log("test fr id", res.data);
+        setCurrentClass(res.data);
+        setMatieres(res.data.matieres);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
-  
+  const handleViewDetails = async (matiere) => {
+    setSelectedMatiere(matiere);
 
+    try {
+      const notesResponse = await getNotesByMatiere(matiere.id);
+
+      console.log(notesResponse.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const handleNewGradeChange = (record, evaluationName, value) => {
+    const updatedEtudiantWithGrades = etudiantWithGrades.map((etudiant) => {
+      if (etudiant.id === record.id) {
+        etudiant.grades[evaluationName] = value;
+      }
+      return etudiant;
+    });
+    setEtudiantWithGrades(updatedEtudiantWithGrades);
+  };
+  const handleNoted = async (matiere) => {
+    handleEvaluation(matiere);
+    setNotedModalVisible(true);
+    try {
+      const matiere_evaluations = await getEtuiantWithGrades(id, matiere.id);
+      setEtudiantWithGrades(matiere_evaluations.data);
+      console.log(matiere_evaluations.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleEvaluation = async (matiere) => {
+    setSelectedMatiere(matiere);
+    try {
+      const matiere_evaluations = await getEvalutionsOfMatiere(matiere.id);
+      setEvaluations(matiere_evaluations.data.evaluations);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCloseNotedModal = () => {
+    setSelectedMatiere(null);
+    setEtudiantWithGrades(null);
+    setNotedModalVisible(false);
+  };
+
+  const columns = [
+    {
+      title: "Etudiant",
+      dataIndex: "studentInfo",
+      key: "studentInfo",
+      width: 200,
+      render: (text, record) => (
+        <div>
+          <div>
+            <span>
+              <strong>CIN:</strong> {record.cin ? `${record.cin} ` : "-"}
+            </span>
+          </div>
+          <div>
+            <span>
+              <strong>Nom et Prenom :</strong>{" "}
+              {record.name ? `${record.name} ` : "-"}
+            </span>
+          </div>
+        </div>
+      ),
+    },
+    ...evaluations.map((evaluation) => ({
+      title: evaluation.name,
+      dataIndex: `grades.${evaluation.name}`,
+      key: `grades.${evaluation.name}`,
+      render: (text, record) => {
+        const editing = isEditing(record, evaluation.name);
+
+        return editing ? (
+          <InputNumber
+            value={record.grades[evaluation.name]}
+            onChange={(value) =>
+              handleNewGradeChange(record, evaluation.name, value)
+            }
+            onBlur={() => save(record, evaluation.name, record.grades[evaluation.name])}
+            onPressEnter={() => save(record, evaluation.name, record.grades[evaluation.name])}
+            autoFocus
+          />
+        ) : (
+          <span onClick={() => edit(record, evaluation.name)}>
+            {record.grades[evaluation.name] !== null ? record.grades[evaluation.name] : "-"}
+          </span>
+        );
+      },
+    })),
+  ];
 
   return (
-    <>    
-       <Row style={{ marginBottom: "20px" }}>
-    <Breadcrumb>
-      <Breadcrumb.Item>Home</Breadcrumb.Item>
-      <Breadcrumb.Item>Department {departmentName}</Breadcrumb.Item>
-      <Breadcrumb.Item>class {currentClass.ref}</Breadcrumb.Item>
-    </Breadcrumb>
-    </Row>
-        <Row gutter={[24, 24]}>
-        
+    <>
+      <Row style={{ marginBottom: "20px" }}>
+        <Breadcrumb>
+          <Breadcrumb.Item>Home</Breadcrumb.Item>
+          <Breadcrumb.Item>Department {departmentName}</Breadcrumb.Item>
+          <Breadcrumb.Item>class {currentClass.ref}</Breadcrumb.Item>
+        </Breadcrumb>
+      </Row>
+      <Row gutter={[24, 24]}>
         {matieres.map((p, index) => (
-            <Col >
-              <Card gutter={[6, 0]}  key={index}
-          style={{
-            width: 300,
-          }}
-          cover={
-            <img
-              alt="example"
-              style={{ width: '100%', height: '200px' }}
-              src={`http://localhost:8000/api/images/${p.photo_url}`} 
-            />
-          }
-          bodyStyle={{
-            width: 300,
-          }}
-          actions={[
-            
-            <Tooltip title="View Notes">
-            <EyeOutlined key="eye" onClick={() => handleViewDetails(p)} />
-            </Tooltip>,
-            <Tooltip title="Noted">
-            <SettingOutlined key="noted" onClick={() => handleNoted(p)}  />
-            </Tooltip>,
-            
-          ]}
-        >
-          <Meta
-            avatar={<Avatar src={`http://localhost:8000/api/images/${p.photo_url}`}  />}
-            title={p.name}
-            description={p.description}
-          />
-             </Card>
-          
-             </Col>   
-))}
-        </Row>
-     
-        <Modal
-        title={selectedMatiere?.name}
-        visible={modalVisible}
-        onCancel={handleCloseModal}
-        footer={[
-          <Button key="close" onClick={handleCloseModal}>
-            Close
-          </Button>,
-        ]}
-      >
-        <Row gutter={[24, 24]}>
-        <div
+          <Col key={index}>
+            <Card
+              gutter={[6, 0]}
               style={{
-                maxHeight: "300px",
-                overflowY: "auto",
-                paddingRight: "20px", 
+                width: 300,
               }}
+              cover={
+                <img
+                  alt="example"
+                  style={{ width: "100%", height: "200px" }}
+                  src={`http://localhost:8000/api/images/${p.photo_url}`}
+                />
+              }
+              bodyStyle={{
+                width: 300,
+              }}
+              actions={[
+                <Tooltip title="View Notes">
+                  <EyeOutlined key="eye" onClick={() => handleViewDetails(p)} />
+                </Tooltip>,
+                <Tooltip title="Noted">
+                  <SettingOutlined
+                    key="noted"
+                    onClick={() => handleNoted(p)}
+                  />
+                </Tooltip>,
+              ]}
             >
-              {notes.map((note, index) => (
-                <Col  span={24} key={index}>
-                  <Card className="card-billing-info" bordered="false">
-                    <div className="col-info">
-                    <Avatar src={`http://localhost:8000/api/images/${note.etudiant.photo_url}`}  />
-                    <Descriptions title={`Note Score: ${note.score}`} titleStyle={{ color: note.score < 10 ? 'red' : 'green' }}>
-                        <Descriptions.Item label="Full Name" span={3}>
-                        {note.etudiant.firstname} {note.etudiant.lastname}
-                        
-                        </Descriptions.Item>
+              <Meta
+                avatar={
+                  <Avatar
+                    src={`http://localhost:8000/api/images/${p.photo_url}`}
+                  />
+                }
+                title={p.name}
+                description={p.description}
+              />
+            </Card>
+          </Col>
+        ))}
+      </Row>
 
-                        <Descriptions.Item label="Email Address" span={3}>
-                        {note.etudiant.firstname}.{note.etudiant.lastname}@isetZG.com
-                        </Descriptions.Item>
-                        <Descriptions.Item label="Identifiant" span={3}>
-                          {note.etudiant.cin}
-                        </Descriptions.Item>
-                      </Descriptions>
-                    </div>
-                    <div className="col-action">
-                      <Button type="link" danger>
-                        DELETE
-                      </Button>
-                      <Button type="link" className="darkbtn">
-                         EDIT
-                      </Button>
-                      
-                    </div>
-                    
-                  </Card>
-                 
-                </Col>
-              ))}
-              </div>
-            </Row>
-      </Modal>
       <Modal
         title={selectedMatiere?.name}
         visible={notedModalVisible}
         onCancel={handleCloseNotedModal}
-        footer={[
-          <Button key="close" onClick={handleCloseNotedModal}>
-            Close
-          </Button>,
-        ]}
+        footer={null}
+        width={900}
       >
-       
-            <Row gutter={[24, 24]}>
-    
-            </Row>
+        <Table
+          dataSource={etudiantWithGrades}
+          rowKey="id"
+          pagination={false}
+          columns={columns}
+          scroll={{ x: true }}
+        />
       </Modal>
     </>
   );

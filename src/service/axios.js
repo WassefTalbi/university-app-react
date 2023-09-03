@@ -58,10 +58,17 @@ export const  getPlanOfSpeciality=(idDegre)=>{
  export const  getMatieres=()=>{
       return universityApi.get("matieres");
       }
-export const  getEvalutionsOfMatiere=(id)=>{
-   return universityApi.get(`matieres/evaluations-of-matiere/${id}`);
+export const  getEtuiantWithGrades=(idClass,idMatiere)=>{
+   return universityApi.get(`students-with-grades/${idClass}/${idMatiere}`);
      }
-     
+export const  getEvalutionsOfMatiere=(idMatiere)=>{
+  return universityApi.get(`matieres/evaluations-of-matiere/${idMatiere}`);
+   }
+  export const  updateGradeInBackend=(id,gradeValue)=>{
+      console.log("id etudiant : ",id," grate Value: " ,gradeValue)
+      return universityApi.post(`updateOrCreateNote/${id}`,gradeValue );
+      }
+    
 //classes
 export const  createClass=(idDepartment,values)=>{
  return universityApi.post(`classrooms/${idDepartment}`,values);
